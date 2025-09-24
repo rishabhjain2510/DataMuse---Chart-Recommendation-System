@@ -1,4 +1,4 @@
-# 📊 DataMuse - Chart Recommender System
+# DataMuse - Chart Recommender System
 
 **Transform your data into beautiful visualizations with intelligent chart recommendations**
 
