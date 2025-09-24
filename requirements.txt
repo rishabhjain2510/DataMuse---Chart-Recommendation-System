@@ -1,0 +1,13 @@
+# Web Framework
+Flask
+
+# Data Processing and Analysis
+pandas
+numpy
+
+# Visualization Libraries
+matplotlib
+seaborn
+
+# Excel File Support
+openpyxl
