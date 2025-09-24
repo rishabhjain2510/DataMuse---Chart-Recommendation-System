@@ -203,6 +203,7 @@ We welcome contributions! Here are some ways you can help:
 - **Flask** team for the lightweight web framework
 - **Tailwind CSS** for the utility-first CSS framework
 - **Anime.js** for smooth animations
+- **Codroidhub** for providing mentorship, resources, and the opportunity to develop this project
 
 ---
 
