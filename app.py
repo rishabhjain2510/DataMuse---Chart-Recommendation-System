@@ -88,52 +88,56 @@ def generate_chart():
         chart_filename = "chart.png" # Static filename
         chart_path = os.path.join(app.config["CHART_FOLDER"], chart_filename)
 
-        plt.figure(figsize=(14, 10))
+        # Clear any existing plots to prevent memory buildup
+        plt.clf()
+        plt.close('all')
+        
+        plt.figure(figsize=(12, 8))  # Reduced size to save memory
         sns.set_theme(style="whitegrid")
         
         # Chart generation logic
         if chart_type == "Histogram":
             sns.histplot(df[col1], kde=True)
-            plt.title(f"Distribution of {col1}", fontsize=20, pad=20)
+            plt.title(f"Distribution of {col1}", fontsize=18, pad=16)
         elif chart_type == "Box Plot (Single Column)":
              sns.boxplot(y=df[col1])
-             plt.title(f"Box Plot of {col1}", fontsize=20, pad=20)
+             plt.title(f"Box Plot of {col1}", fontsize=18, pad=16)
         elif chart_type == "Count Plot":
             sns.countplot(x=df[col1], order=df[col1].value_counts().index)
-            plt.title(f"Frequency of Categories in {col1}", fontsize=20, pad=20)
+            plt.title(f"Frequency of Categories in {col1}", fontsize=18, pad=16)
         elif chart_type == "Pie Chart":
-            df[col1].value_counts().plot(kind="pie", autopct="%1.1f%%", startangle=140, fontsize=14)
+            df[col1].value_counts().plot(kind="pie", autopct="%1.1f%%", startangle=140, fontsize=12)
             plt.ylabel("")
-            plt.title(f"Proportion of Categories in {col1}", fontsize=20, pad=20)
+            plt.title(f"Proportion of Categories in {col1}", fontsize=18, pad=16)
         elif chart_type == "Scatter Plot":
             sns.scatterplot(data=df, x=col1, y=col2)
-            plt.title(f"Scatter Plot: {col1} vs {col2}", fontsize=20, pad=20)
+            plt.title(f"Scatter Plot: {col1} vs {col2}", fontsize=18, pad=16)
         elif chart_type == "Line Plot (Time-Series)":
             # Ensure the datetime column is on the x-axis
             x_col, y_col = (col1, col2) if col1 in datetime_cols else (col2, col1)
             sns.lineplot(data=df, x=x_col, y=y_col)
-            plt.title(f"Trend of {y_col} over Time", fontsize=20, pad=20)
+            plt.title(f"Trend of {y_col} over Time", fontsize=18, pad=16)
         elif chart_type == "Bar Plot (by Value)":
             # Ensure the categorical column is on the x-axis
             x_col, y_col = (col1, col2) if col1 in categorical_cols else (col2, col1)
             sns.barplot(data=df, x=x_col, y=y_col, estimator=sum)
-            plt.title(f"Total {y_col} by {x_col}", fontsize=20, pad=20)
+            plt.title(f"Total {y_col} by {x_col}", fontsize=18, pad=16)
         elif chart_type == "Box Plot (by Category)":
             x_col, y_col = (col1, col2) if col1 in categorical_cols else (col2, col1)
             sns.boxplot(data=df, x=x_col, y=y_col)
-            plt.title(f"Distribution of {y_col} across {x_col}", fontsize=20, pad=20)
+            plt.title(f"Distribution of {y_col} across {x_col}", fontsize=18, pad=16)
         elif chart_type == "Correlation Heatmap":
             numeric_df = df.select_dtypes(include=["number"])
             corr = numeric_df.corr()
-            sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", annot_kws={'fontsize': 12})
-            plt.title("Correlation Heatmap of Numeric Columns", fontsize=20, pad=20)
+            sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", annot_kws={'fontsize': 10})
+            plt.title("Correlation Heatmap of Numeric Columns", fontsize=18, pad=16)
         
-        plt.xticks(rotation=rotation, fontsize=12)
-        plt.yticks(rotation=y_rotation, fontsize=12)
-        plt.xlabel(plt.gca().get_xlabel(), fontsize=14)
-        plt.ylabel(plt.gca().get_ylabel(), fontsize=14)
+        plt.xticks(rotation=rotation, fontsize=10)
+        plt.yticks(rotation=y_rotation, fontsize=10)
+        plt.xlabel(plt.gca().get_xlabel(), fontsize=12)
+        plt.ylabel(plt.gca().get_ylabel(), fontsize=12)
         plt.tight_layout()
-        plt.savefig(chart_path, dpi=200, bbox_inches='tight')
+        plt.savefig(chart_path, dpi=150, bbox_inches='tight')
         plt.close()
 
         chart_url = url_for('static', filename=f'charts/{chart_filename}')
@@ -174,50 +178,54 @@ def generate_chart_ajax():
         chart_filename = "chart.png"
         chart_path = os.path.join(app.config["CHART_FOLDER"], chart_filename)
 
-        plt.figure(figsize=(14, 10))
+        # Clear any existing plots to prevent memory buildup
+        plt.clf()
+        plt.close('all')
+        
+        plt.figure(figsize=(12, 8))  # Reduced size to save memory
         sns.set_theme(style="whitegrid")
         
         # Chart generation logic (same as above)
         if chart_type == "Histogram":
             sns.histplot(df[col1], kde=True)
-            plt.title(f"Distribution of {col1}", fontsize=20, pad=20)
+            plt.title(f"Distribution of {col1}", fontsize=18, pad=16)
         elif chart_type == "Box Plot (Single Column)":
              sns.boxplot(y=df[col1])
-             plt.title(f"Box Plot of {col1}", fontsize=20, pad=20)
+             plt.title(f"Box Plot of {col1}", fontsize=18, pad=16)
         elif chart_type == "Count Plot":
             sns.countplot(x=df[col1], order=df[col1].value_counts().index)
-            plt.title(f"Frequency of Categories in {col1}", fontsize=20, pad=20)
+            plt.title(f"Frequency of Categories in {col1}", fontsize=18, pad=16)
         elif chart_type == "Pie Chart":
-            df[col1].value_counts().plot(kind="pie", autopct="%1.1f%%", startangle=140, fontsize=14)
+            df[col1].value_counts().plot(kind="pie", autopct="%1.1f%%", startangle=140, fontsize=12)
             plt.ylabel("")
-            plt.title(f"Proportion of Categories in {col1}", fontsize=20, pad=20)
+            plt.title(f"Proportion of Categories in {col1}", fontsize=18, pad=16)
         elif chart_type == "Scatter Plot":
             sns.scatterplot(data=df, x=col1, y=col2)
-            plt.title(f"Scatter Plot: {col1} vs {col2}", fontsize=20, pad=20)
+            plt.title(f"Scatter Plot: {col1} vs {col2}", fontsize=18, pad=16)
         elif chart_type == "Line Plot (Time-Series)":
             x_col, y_col = (col1, col2) if col1 in datetime_cols else (col2, col1)
             sns.lineplot(data=df, x=x_col, y=y_col)
-            plt.title(f"Trend of {y_col} over Time", fontsize=20, pad=20)
+            plt.title(f"Trend of {y_col} over Time", fontsize=18, pad=16)
         elif chart_type == "Bar Plot (by Value)":
             x_col, y_col = (col1, col2) if col1 in categorical_cols else (col2, col1)
             sns.barplot(data=df, x=x_col, y=y_col, estimator=sum)
-            plt.title(f"Total {y_col} by {x_col}", fontsize=20, pad=20)
+            plt.title(f"Total {y_col} by {x_col}", fontsize=18, pad=16)
         elif chart_type == "Box Plot (by Category)":
             x_col, y_col = (col1, col2) if col1 in categorical_cols else (col2, col1)
             sns.boxplot(data=df, x=x_col, y=y_col)
-            plt.title(f"Distribution of {y_col} across {x_col}", fontsize=20, pad=20)
+            plt.title(f"Distribution of {y_col} across {x_col}", fontsize=18, pad=16)
         elif chart_type == "Correlation Heatmap":
             numeric_df = df.select_dtypes(include=["number"])
             corr = numeric_df.corr()
-            sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", annot_kws={'fontsize': 12})
-            plt.title("Correlation Heatmap of Numeric Columns", fontsize=20, pad=20)
+            sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", annot_kws={'fontsize': 10})
+            plt.title("Correlation Heatmap of Numeric Columns", fontsize=18, pad=16)
         
-        plt.xticks(rotation=rotation, fontsize=12)
-        plt.yticks(rotation=y_rotation, fontsize=12)
-        plt.xlabel(plt.gca().get_xlabel(), fontsize=14)
-        plt.ylabel(plt.gca().get_ylabel(), fontsize=14)
+        plt.xticks(rotation=rotation, fontsize=10)
+        plt.yticks(rotation=y_rotation, fontsize=10)
+        plt.xlabel(plt.gca().get_xlabel(), fontsize=12)
+        plt.ylabel(plt.gca().get_ylabel(), fontsize=12)
         plt.tight_layout()
-        plt.savefig(chart_path, dpi=200, bbox_inches='tight')
+        plt.savefig(chart_path, dpi=150, bbox_inches='tight')
         plt.close()
 
         chart_url = url_for('static', filename=f'charts/{chart_filename}')

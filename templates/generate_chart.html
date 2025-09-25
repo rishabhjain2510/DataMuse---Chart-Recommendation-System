@@ -62,8 +62,16 @@
             box-shadow: 0 0 0 3px rgba(203, 0, 255, 0.1);
         }
         .form-select option {
-            background: #1a0d2e;
+            background: #2d1b47;
             color: white;
+            padding: 8px 12px;
+        }
+        .form-select optgroup {
+            background: #1a0d2e;
+            color: #cb00ff;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 4px 8px;
         }
         .gradient-button {
             background: linear-gradient(135deg, #cb00ff 0%, #8b3a62 50%, #b83d50 100%);
@@ -148,6 +156,44 @@
                         <p class="text-gray-300 opacity-80 text-sm">Configure your visualization</p>
                     </div>
 
+                    <!-- Column Type Display Section -->
+                    <div class="mb-6 space-y-4">
+                        <div class="glass-card rounded-xl p-4 bg-white/5">
+                            <h3 class="text-sm font-semibold text-purple-200 mb-3">Numeric Columns</h3>
+                            <div class="flex flex-wrap gap-2">
+                                {% for col in numeric_cols %}
+                                <span class="px-2 py-1 bg-blue-500/20 text-blue-200 rounded-lg text-xs border border-blue-400/30">{{ col }}</span>
+                                {% endfor %}
+                                {% if not numeric_cols %}
+                                <span class="text-gray-400 text-xs italic">No numeric columns found</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card rounded-xl p-4 bg-white/5">
+                            <h3 class="text-sm font-semibold text-purple-200 mb-3">Categorical Columns</h3>
+                            <div class="flex flex-wrap gap-2">
+                                {% for col in categorical_cols %}
+                                <span class="px-2 py-1 bg-green-500/20 text-green-200 rounded-lg text-xs border border-green-400/30">{{ col }}</span>
+                                {% endfor %}
+                                {% if not categorical_cols %}
+                                <span class="text-gray-400 text-xs italic">No categorical columns found</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if datetime_cols %}
+                        <div class="glass-card rounded-xl p-4 bg-white/5">
+                            <h3 class="text-sm font-semibold text-purple-200 mb-3">Datetime Columns</h3>
+                            <div class="flex flex-wrap gap-2">
+                                {% for col in datetime_cols %}
+                                <span class="px-2 py-1 bg-purple-500/20 text-purple-200 rounded-lg text-xs border border-purple-400/30">{{ col }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
                     <form id="chartForm" class="space-y-4" autocomplete="off">
                         
                         <!-- Column Selectors -->
@@ -174,11 +220,32 @@
                             </div>
                         </div>
 
-                        <!-- Suggested Chart Types -->
+                        <!-- Chart Types -->
                         <div>
                             <label for="chart_type" class="block text-sm font-medium text-purple-200 mb-2">Chart Type</label>
                             <select id="chart_type" name="chart_type" class="form-select mt-1 block w-full pl-3 pr-10 py-2 text-sm rounded-xl" required>
-                                <option value="" disabled selected>-- Select columns first --</option>
+                                <option value="">-- Select a Chart --</option>
+                                <optgroup label="Single Numeric Column">
+                                    <option value="Histogram">Histogram</option>
+                                    <option value="Box Plot (Single Column)">Box Plot</option>
+                                </optgroup>
+                                <optgroup label="Two Numeric Columns">
+                                    <option value="Scatter Plot">Scatter Plot</option>
+                                </optgroup>
+                                <optgroup label="All Numeric Columns">
+                                    <option value="Correlation Heatmap">Correlation Heatmap</option>
+                                </optgroup>
+                                <optgroup label="Single Categorical Column">
+                                    <option value="Count Plot">Count Plot</option>
+                                    <option value="Pie Chart">Pie Chart</option>
+                                </optgroup>
+                                <optgroup label="Categorical + Numeric">
+                                    <option value="Bar Plot (by Value)">Bar Plot (by Value)</option>
+                                    <option value="Box Plot (by Category)">Box Plot (by Category)</option>
+                                </optgroup>
+                                <optgroup label="Time Series">
+                                    <option value="Line Plot (Time-Series)">Line Plot (Time-Series)</option>
+                                </optgroup>
                             </select>
                         </div>
                         
@@ -255,8 +322,8 @@
             return 'Unknown';
         }
 
-        // --- CORE LOGIC: Update suggestions based on selected columns ---
-        function updateSuggestions() {
+        // --- CORE LOGIC: Update column type display and enable form ---
+        function updateColumnTypes() {
             const col1 = col1Select.value;
             const col2 = col2Select.value;
             const type1 = getColumnType(col1);
@@ -266,53 +333,26 @@
             col1TypeEl.textContent = type1 ? `Detected as: ${type1}` : '';
             col2TypeEl.textContent = type2 ? `Detected as: ${type2}` : '';
 
-            let suggestions = [];
+            // Enable submit button if at least one column is selected and chart type is chosen
+            const canSubmit = col1 && chartTypeSelect.value;
+            submitBtn.disabled = !canSubmit;
+        }
 
-            // Rule Implementation based on your logic
-            if (col1 && !col2) { // Single Column Logic
-                if (type1 === 'Numeric') {
-                    suggestions = ["Histogram", "Box Plot (Single Column)"];
-                } else if (type1 === 'Categorical') {
-                    suggestions = ["Count Plot", "Pie Chart"];
-                }
-            } else if (col1 && col2 && col1 !== col2) { // Two Column Logic
-                const types = [type1, type2].sort().join(',');
-                if (types === 'Numeric,Numeric') {
-                    suggestions = ["Scatter Plot"];
-                } else if (types === 'Categorical,Numeric') {
-                    suggestions = ["Bar Plot (by Value)", "Box Plot (by Category)"];
-                } else if (types === 'Datetime,Numeric') {
-                    suggestions = ["Line Plot (Time-Series)"];
-                } else if (types === 'Categorical,Categorical') {
-                    suggestions = ["Heatmap (Crosstab)"];
-                }
-            }
-            
-            // Add multi-column charts that don't depend on selection
-            if(numericCols.length >= 2) {
-                 if (!suggestions.includes("Correlation Heatmap")) {
-                    suggestions.push("Correlation Heatmap");
-                 }
+        // --- CHART TYPE VALIDATION ---
+        function validateChartSelection() {
+            const col1 = col1Select.value;
+            const col2 = col2Select.value;
+            const chartType = chartTypeSelect.value;
+            const type1 = getColumnType(col1);
+            const type2 = getColumnType(col2);
+
+            if (!chartType || !col1) {
+                return true; // Allow selection, validation happens on submit
             }
 
-            // --- UI UPDATE ---
-            chartTypeSelect.innerHTML = ''; // Clear old options
-            if (suggestions.length > 0) {
-                submitBtn.disabled = false;
-                suggestions.forEach(chart => {
-                    const option = document.createElement('option');
-                    option.value = chart;
-                    option.textContent = chart;
-                    chartTypeSelect.appendChild(option);
-                });
-            } else {
-                submitBtn.disabled = true;
-                const option = document.createElement('option');
-                option.textContent = col1 ? '-- No charts for this combination --' : '-- Select columns first --';
-                option.disabled = true;
-                option.selected = true;
-                chartTypeSelect.appendChild(option);
-            }
+            // Basic validation - let server handle detailed validation
+            const canSubmit = col1 && chartType;
+            submitBtn.disabled = !canSubmit;
         }
 
         // --- AJAX CHART GENERATION ---
@@ -390,15 +430,17 @@
         }
 
         // --- EVENT LISTENERS ---
-        col1Select.addEventListener('change', updateSuggestions);
-        col2Select.addEventListener('change', updateSuggestions);
+        col1Select.addEventListener('change', () => {
+            updateColumnTypes();
+            validateChartSelection();
+        });
+        col2Select.addEventListener('change', () => {
+            updateColumnTypes();
+            validateChartSelection();
+        });
+        chartTypeSelect.addEventListener('change', validateChartSelection);
         submitBtn.addEventListener('click', generateChart);
         downloadBtn.addEventListener('click', downloadChart);
-
-        // Auto-generate chart when settings change (optional - uncomment if desired)
-        // chartTypeSelect.addEventListener('change', () => {
-        //     if (!submitBtn.disabled) generateChart();
-        // });
 
         // --- INITIALIZATION ---
         // Check if there's an initial chart URL and enable download button if needed
@@ -410,7 +452,8 @@
         }
         
         // --- INITIAL CALL ---
-        updateSuggestions();
+        updateColumnTypes();
+        validateChartSelection();
 
         // Add page load animations
         anime.timeline({loop: false})
